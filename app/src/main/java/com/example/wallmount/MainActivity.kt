@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
+import android.widget.LinearLayout
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import org.mozilla.geckoview.GeckoResult
@@ -19,7 +20,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var geckoRuntime: GeckoRuntime
     private lateinit var sharedPreferences: SharedPreferences
 
-    private val BASE_URL = "http://192.168.1.105:8888/index.html"  // change this to your real base URL
+    private val BASE_URL = "http://192.168.1.105:8888/index.html"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,15 +31,15 @@ class MainActivity : AppCompatActivity() {
         // GeckoView setup
         geckoRuntime = GeckoRuntime.create(this)
         geckoSession = GeckoSession()
-        
+
         geckoSession.permissionDelegate = object : GeckoSession.PermissionDelegate {
             override fun onContentPermissionRequest(
                 session: GeckoSession,
                 permission: GeckoSession.PermissionDelegate.ContentPermission,
             ): GeckoResult<Int> {
-                val result = GeckoResult<Int>();
-                result.complete(1);
-                return result;
+                val result = GeckoResult<Int>()
+                result.complete(1)
+                return result
             }
         }
 
@@ -47,7 +48,6 @@ class MainActivity : AppCompatActivity() {
         geckoSession.open(geckoRuntime)
         geckoView.setSession(geckoSession)
 
-        // Put the GeckoView inside our layout
         val geckoViewContainer = findViewById<View>(R.id.geckoViewContainer)
         (geckoViewContainer as? android.widget.FrameLayout)?.addView(geckoView)
 
@@ -55,54 +55,55 @@ class MainActivity : AppCompatActivity() {
         loadDevicePage(savedDeviceId)
 
         setupHoverBehavior()
-        setupSettingsButton()
+        setupButtons()
     }
 
     private fun loadDevicePage(deviceId: String?) {
         if (deviceId.isNullOrEmpty()) return
-        val url = BASE_URL; // + "/$deviceId"
+        val url = BASE_URL
         geckoSession.loadUri(url)
+    }
+
+    private fun refreshPage() {
+        geckoSession.reload()
     }
 
     private fun setupHoverBehavior() {
         val hoverArea = findViewById<View>(R.id.hoverArea)
-        val btnSettings = findViewById<View>(R.id.btnSettings)
+        val btnPanel = findViewById<View>(R.id.btnPanel) // Panel containing buttons
 
-        // 1) MOUSE HOVER
         hoverArea.setOnHoverListener { _, event ->
             when (event.action) {
                 MotionEvent.ACTION_HOVER_ENTER -> {
-                    // Show the button
-                    btnSettings.visibility = View.VISIBLE
+                    btnPanel.visibility = View.VISIBLE
                 }
                 MotionEvent.ACTION_HOVER_EXIT -> {
-                    // Optionally hide after 1 second
-                    btnSettings.postDelayed({
-                        btnSettings.visibility = View.GONE
+                    btnPanel.postDelayed({
+                        btnPanel.visibility = View.GONE
                     }, 1000)
                 }
             }
-            // Return false so the event can continue to other listeners if needed
             false
         }
 
-        // 2) TAP/CLICK
         hoverArea.setOnClickListener {
-            // Show the settings button on tap
-            btnSettings.visibility = View.VISIBLE
-
-            // Optionally auto-hide after 3 seconds if you want:
-            btnSettings.postDelayed({
-                btnSettings.visibility = View.GONE
+            btnPanel.visibility = View.VISIBLE
+            btnPanel.postDelayed({
+                btnPanel.visibility = View.GONE
             }, 3000)
         }
     }
 
-
-    private fun setupSettingsButton() {
+    private fun setupButtons() {
         val btnSettings = findViewById<View>(R.id.btnSettings)
+        val btnRefresh = findViewById<View>(R.id.btnRefresh)
+
         btnSettings.setOnClickListener {
             showSettingsDialog()
+        }
+
+        btnRefresh.setOnClickListener {
+            refreshPage()
         }
     }
 

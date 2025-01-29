@@ -17,9 +17,9 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        ndk {
-            abiFilters.add("armeabi-v7a")
-        }
+//        ndk {
+//            abiFilters.add("armeabi-v7a")
+//        }
     }
 
     buildTypes {
@@ -31,6 +31,7 @@ android {
             )
             isDebuggable = false
             isJniDebuggable = false
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {
